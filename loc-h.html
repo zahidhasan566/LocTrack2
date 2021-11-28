@@ -1,0 +1,68 @@
+<html>
+<body onload = "JavaScript:AutoRefresh(300000);">
+<div id="wrapper">
+
+
+  <!-- Page heading -->
+  <h1>Geolocation</h1>
+
+  <!-- Status -->
+  <p id="check">Finding your location: <span id="status">updating...</span></p>
+
+	<h4>Your Current position is</h4>
+	<p id="demo">
+</p>
+<p id="map">
+
+</p>
+<p id="oel">
+
+</p>
+  <p id="fullmap" >
+
+</p>
+</div>
+  </body>
+</html>
+
+<script type = "text/JavaScript">
+        var x = document.getElementById("demo");
+        var y = document.getElementById("map");
+        var z = document.getElementById("oel");
+        var fullmap = document.getElementById("fullmap");
+        var id;
+        var successHandler = function (position) {
+            // alert(position.coords.latitude);
+            // alert(position.coords.longitude);
+            x.innerHTML = "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
+            y.innerHTML = "Latitude,longitude: " + position.coords.latitude + "," + position.coords.longitude;
+            z.innerHTML = "accuracy:" + position.coords.accuracy + "<br>"
+                           "heading:" + position.coords.heading + "<br>"
+                           "speed:" + position.coords.speed;
+            var drt = new Date(position.timestamp);
+            fullmap.innerHTML = "Timestamp:" + drt;
+            navigator.geolocation.clearWatch(id);
+
+            //fullmap.innerHTML= " https://www.google.com/maps/@ "+ position.coords.latitude+ ","+ position.coords.longitude;
+
+
+        };
+        var errorHandler = function (errorObj) {
+            alert(errorObj.code + ": " + errorObj.message);
+
+            alert("something wrong take this lat " + 26.0546106);
+            alert("something wrong take this lng " + -98.3939791);
+        };
+        navigator.geolocation.getCurrentPosition(
+            successHandler, errorHandler,
+            {enableHighAccuracy: true, maximumAge: 10000});
+
+        id = navigator.geolocation.watchPosition(successHandler, errorHandler);
+        console.log(id);
+        //setTimeout("location.reload(true);", t);
+        //window.location.reload(100000);
+        //window.setInterval('refresh()', 10);
+        function AutoRefresh( t ) {
+            setTimeout("location.reload(true);", t);
+        }
+</script>
