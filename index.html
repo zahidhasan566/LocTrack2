@@ -36,11 +36,15 @@
             // alert(position.coords.longitude);
             x.innerHTML = "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
             y.innerHTML = "Latitude,longitude: " + position.coords.latitude + "," + position.coords.longitude;
-            z.innerHTML = "accuracy:" + position.coords.accuracy + "<br>"
-                           "heading:" + position.coords.heading + "<br>"
+            z.innerHTML = "accuracy:" + position.coords.accuracy + "<br>" +
+                           "heading:" + position.coords.heading + "<br>"+
                            "speed:" + position.coords.speed;
             var drt = new Date(position.timestamp);
-            fullmap.innerHTML = "Timestamp:" + drt;
+            var newDate =new Date(Date.now());
+            fullmap.innerHTML = "Timestamp:" + drt + "<br>"+
+
+                              "now:"     + newDate;
+
             navigator.geolocation.clearWatch(id);
 
             //fullmap.innerHTML= " https://www.google.com/maps/@ "+ position.coords.latitude+ ","+ position.coords.longitude;
