@@ -1,5 +1,6 @@
 <html>
-<body onload = "JavaScript:AutoRefresh(300000);">
+<!--<body onload = "JavaScript:AutoRefresh(25000);">-->
+<body>
 <div id="wrapper">
 
 
@@ -8,7 +9,6 @@
 
   <!-- Status -->
   <p id="check">Finding your location: <span id="status">updating...</span></p>
-
 	<h4>Your Current position is</h4>
 	<p id="demo">
 </p>
@@ -21,6 +21,9 @@
   <p id="fullmap" >
 
 </p>
+    <p id="history" >
+
+    </p>
 </div>
   </body>
 </html>
@@ -30,7 +33,13 @@
         var y = document.getElementById("map");
         var z = document.getElementById("oel");
         var fullmap = document.getElementById("fullmap");
+        var his = document.getElementById("history");
         var id;
+        var latitude ;
+        var longitude ;
+        var accuracy  ;
+        var heading  ;
+        var speed;
         var successHandler = function (position) {
             // alert(position.coords.latitude);
             // alert(position.coords.longitude);
@@ -44,11 +53,27 @@
             fullmap.innerHTML = "Timestamp:" + drt + "<br>"+
 
                               "now:"     + newDate;
+            console.log(localStorage.getItem('jsonObj'));
 
+            jsonObj= [];
+            //jsonObj = jsonObj.push(localStorage.getItem('jsonObj'));
+            item = {};
+            item ["latitude"] = position.coords.latitude;
+            item ["longitude"] = position.coords.longitude;
+            item ["accuracy"] = position.coords.accuracy;
+            item ["heading"] = position.coords.heading;
+            item ["speed"] = position.coords.speed;
+            console.log(localStorage.getItem('jsonObj'));
+            jsonObj.push(item);
+            localStorage.setItem('jsonObj',JSON.stringify(jsonObj) );
+
+
+          //  var his2= ('retrievedObject: ', JSON.parse(retrievedObject));
+
+           // console.log('retrievedObject: ', JSON.parse(retrievedObject));
             navigator.geolocation.clearWatch(id);
 
             //fullmap.innerHTML= " https://www.google.com/maps/@ "+ position.coords.latitude+ ","+ position.coords.longitude;
-
 
         };
         var errorHandler = function (errorObj) {
@@ -62,11 +87,13 @@
             {enableHighAccuracy: true, maximumAge: 10000});
 
         id = navigator.geolocation.watchPosition(successHandler, errorHandler);
-        console.log(id);
         //setTimeout("location.reload(true);", t);
         //window.location.reload(100000);
         //window.setInterval('refresh()', 10);
         function AutoRefresh( t ) {
             setTimeout("location.reload(true);", t);
+         //   var retrievedObject = localStorage.getItem('jsonObj');
+            //his.innerHTML= 'history: '+ retrievedObject;
         }
+
 </script>
