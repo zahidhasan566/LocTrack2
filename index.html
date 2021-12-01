@@ -171,12 +171,15 @@
             onValue(info_data, (snapshot) => {
                 const final_data = snapshot.val();
                 var i = 0;
+                var id = localStorage.getItem('id');
+                var id2 = localStorage.getItem('id');
                 final_data.forEach(childsnapshot => {
                     var childData = childsnapshot;
+
                     console.log((childData.info).final_id);
                     i++;
-                    his.innerHTML += 'history: ' + '<br>' +
-                        'id: ' +i + '<br>' +
+                    his.innerHTML = 'history: ' + '<br>' +
+                        'id: ' +id + '<br>' +
                         'TripId : ' + (childData.info).TripId + '<br>' +
                         'latitude : ' + (childData.info).latitude + '<br>' +
                         'longitude :' + (childData.info).longitude + '<br>' +
