@@ -1,8 +1,11 @@
 <html>
 <!--<body onload = "JavaScript:AutoRefresh(25000);">-->
+<head><title>Geo Location</title></head>
 <body>
-<div id="wrapper">
 
+<button style="padding: 10px;background: #00ffe7;font-size: 17px;font-weight: 800;" id="sbtn"> Start Trip</button>
+<button style="padding: 10px;background: #00ffe7;font-size: 17px;font-weight: 800;" id="ebtn"> End Trip</button>
+<div id="wrapper" onload = "JavaScript:AutoRefresh(5000);">
 
   <!-- Page heading -->
   <h1>Geolocation</h1>
@@ -21,79 +24,250 @@
   <p id="fullmap" >
 
 </p>
+    <p id="historyId" >
+
+    </p>
     <p id="history" >
 
     </p>
+    <button class="accordion"> history</button>
+    <div class="panel">
+        <p id="history2"></p>
+    </div>
+
+    </div>
 </div>
-  </body>
-</html>
-
-<script type = "text/JavaScript">
-        var x = document.getElementById("demo");
-        var y = document.getElementById("map");
-        var z = document.getElementById("oel");
-        var fullmap = document.getElementById("fullmap");
-        var his = document.getElementById("history");
-        var id;
-        var latitude ;
-        var longitude ;
-        var accuracy  ;
-        var heading  ;
-        var speed;
-        var successHandler = function (position) {
-            // alert(position.coords.latitude);
-            // alert(position.coords.longitude);
-            x.innerHTML = "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
-            y.innerHTML = "Latitude,longitude: " + position.coords.latitude + "," + position.coords.longitude;
-            z.innerHTML = "accuracy:" + position.coords.accuracy + "<br>" +
-                           "heading:" + position.coords.heading + "<br>"+
-                           "speed:" + position.coords.speed;
-            var drt = new Date(position.timestamp);
-            var newDate =new Date(Date.now());
-            fullmap.innerHTML = "Timestamp:" + drt + "<br>"+
-
-                              "now:"     + newDate;
-            console.log(localStorage.getItem('jsonObj'));
-
-            jsonObj= [];
-            //jsonObj = jsonObj.push(localStorage.getItem('jsonObj'));
-            item = {};
-            item ["latitude"] = position.coords.latitude;
-            item ["longitude"] = position.coords.longitude;
-            item ["accuracy"] = position.coords.accuracy;
-            item ["heading"] = position.coords.heading;
-            item ["speed"] = position.coords.speed;
-            console.log(localStorage.getItem('jsonObj'));
-            jsonObj.push(item);
-            localStorage.setItem('jsonObj',JSON.stringify(jsonObj) );
+<!--<script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-app.js"></script>-->
+<!--<script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-database.js"></script>-->
 
 
-          //  var his2= ('retrievedObject: ', JSON.parse(retrievedObject));
 
-           // console.log('retrievedObject: ', JSON.parse(retrievedObject));
-            navigator.geolocation.clearWatch(id);
+<script type = "module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.5.0/firebase-app.js";
+        import {getDatabase,ref,set,onValue,child,update,remove} from "https://www.gstatic.com/firebasejs/9.5.0/firebase-database.js";
+        var loadhtml= document.getElementById("wrapper");
+        var btn= document.getElementById("sbtn");
+        var ebtn= document.getElementById("ebtn");
+        let newTripId= Math.random().toString(16).slice(2);
+        loadhtml.style.visibility = 'hidden';
+        ebtn.style.visibility = 'hidden';
+        let stopRefresh='';
 
-            //fullmap.innerHTML= " https://www.google.com/maps/@ "+ position.coords.latitude+ ","+ position.coords.longitude;
-
-        };
-        var errorHandler = function (errorObj) {
-            alert(errorObj.code + ": " + errorObj.message);
-
-            alert("something wrong take this lat " + 26.0546106);
-            alert("something wrong take this lng " + -98.3939791);
-        };
-        navigator.geolocation.getCurrentPosition(
-            successHandler, errorHandler,
-            {enableHighAccuracy: true, maximumAge: 10000});
-
-        id = navigator.geolocation.watchPosition(successHandler, errorHandler);
-        //setTimeout("location.reload(true);", t);
-        //window.location.reload(100000);
-        //window.setInterval('refresh()', 10);
-        function AutoRefresh( t ) {
-            setTimeout("location.reload(true);", t);
-         //   var retrievedObject = localStorage.getItem('jsonObj');
-            //his.innerHTML= 'history: '+ retrievedObject;
+        btn.addEventListener("click", myFunction, false);
+        function myFunction() {
+            loadhtml.style.visibility = 'visible';
+            btn.style.visibility = 'hidden';
+            ebtn.style.visibility ='visible';
+           // tripStart();
+             stopRefresh = setInterval( tripStart, 5000);
+           // AutoRefresh();
+        }
+        ebtn.addEventListener("click", myFunction2, false);
+        function myFunction2() {
+            window.localStorage.clear();
+            loadhtml.style.visibility = 'hidden';
+                btn.style.visibility = 'visible';
+                ebtn.style.visibility ='hidden';
+                 clearInterval(stopRefresh);
+            location.reload();
         }
 
+        function tripStart() {
+            var x = document.getElementById("demo");
+            var y = document.getElementById("map");
+            var z = document.getElementById("oel");
+            var fullmap = document.getElementById("fullmap");
+            var his = document.getElementById("history2");
+            var historyId = document.getElementById("historyId");
+            var id;
+            var latitude;
+            var longitude;
+            var accuracy;
+            var heading;
+            var speed;
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyDZQ8TOOeY1r7MSdEbRUWrsxfyrCM4oR4o",
+                authDomain: "avrs-geolocation-adb46.firebaseapp.com",
+                databaseURL: "https://avrs-geolocation-adb46-default-rtdb.asia-southeast1.firebasedatabase.app/",
+                projectId: "avrs-geolocation-adb46",
+                storageBucket: "avrs-geolocation-adb46.appspot.com",
+                messagingSenderId: "1044340778078",
+                appId: "1:1044340778078:web:96343a4f3b3661414b00cf"
+            };
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase();
+
+            var successHandler = function (position) {
+                // alert(position.coords.latitude);
+                // alert(position.coords.longitude);
+                x.innerHTML = "Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
+                y.innerHTML = "Latitude,longitude: " + position.coords.latitude + "," + position.coords.longitude;
+                z.innerHTML = "accuracy:" + position.coords.accuracy + "<br>" +
+                    "heading:" + position.coords.heading + "<br>" +
+                    "speed:" + position.coords.speed;
+                var drt = new Date(position.timestamp);
+                var newDate = new Date(Date.now());
+                fullmap.innerHTML = "Timestamp:" + drt + "<br>" +
+
+                    "now:" + newDate;
+                latitude = position.coords.latitude;
+                longitude = position.coords.longitude;
+                accuracy = position.coords.accuracy;
+                heading = position.coords.heading;
+                speed = position.coords.speed;
+               // newTripId= localStorage.getItem('tripId');
+
+                    var jsonObj = [];
+                    var item = {};
+                    item ["TripId"] = newTripId;
+                    item ["latitude"] = position.coords.latitude;
+                    item ["longitude"] = position.coords.longitude;
+                    item ["accuracy"] = position.coords.accuracy;
+                    item ["heading"] = position.coords.heading;
+                    item ["speed"] = position.coords.speed;
+                    item ["timestamp"] = new Date(position.timestamp);
+                    item ["now"] = new Date(Date.now());
+                    jsonObj.push(item);
+                    localStorage.setItem('jsonObj', JSON.stringify(item));
+                    navigator.geolocation.clearWatch(id);
+
+                //fullmap.innerHTML= " https://www.google.com/maps/@ "+ position.coords.latitude+ ","+ position.coords.longitude;
+
+            };
+            var retrievedObject = localStorage.getItem('jsonObj');
+            var id = 0;
+            var final_id = '';
+            const new_id = ref(db, 'LocInfo');
+            onValue(new_id, (snapshot) => {
+                const new_id2 = snapshot.val();
+                final_id = new_id2.length;
+                localStorage.setItem('id', final_id);
+            });
+            //console.log(final_id);
+            var id2 = localStorage.getItem('id')
+            console.log(id2 + "--db");
+            if (id2 > 0) {
+                final_id = id2++;
+                console.log(final_id);
+
+                set(ref(db, "LocInfo/" + final_id), {
+                    info: JSON.parse(retrievedObject)
+
+                }).then(() => {
+
+                    // alert("data stored successfully")
+                })
+                    .catch((error) => {
+                        // alert(("unsuccessfully"+error))
+                    })
+            } else {
+                set(ref(db, "LocInfo/" + 0), {
+                    info: JSON.parse(retrievedObject)
+                });
+            }
+            const info_data = ref(db, 'LocInfo/');
+            onValue(info_data, (snapshot) => {
+                const final_data = snapshot.val();
+                var i = 0;
+                final_data.forEach(childsnapshot => {
+                    var childData = childsnapshot;
+                    console.log((childData.info).final_id);
+                    i++;
+                    his.innerHTML += 'history: ' + '<br>' +
+                        'id: ' +i + '<br>' +
+                        'TripId : ' + (childData.info).TripId + '<br>' +
+                        'latitude : ' + (childData.info).latitude + '<br>' +
+                        'longitude :' + (childData.info).longitude + '<br>' +
+                        'accuracy :' + (childData.info).accuracy + '<br>' +
+                        'now :' + (childData.info).now + '<br>' +
+                        'timestamp :' + (childData.info).timestamp + '<br>'
+
+                })
+            });
+
+            var errorHandler = function (errorObj) {
+                alert(errorObj.code + ": " + errorObj.message);
+
+                alert("something wrong take this lat " + 26.0546106);
+                alert("something wrong take this lng " + -98.3939791);
+            };
+            navigator.geolocation.getCurrentPosition(
+                successHandler, errorHandler,
+                {enableHighAccuracy: true, maximumAge: 10000});
+
+            id = navigator.geolocation.watchPosition(successHandler, errorHandler);
+            //setTimeout("location.reload(true);", t);
+            //window.location.reload(100000);
+            //window.setInterval('refresh()', 10);
+
+
+
+
+            var acc = document.getElementsByClassName("accordion");
+            var i;
+
+            for (i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function () {
+                    /* Toggle between adding and removing the "active" class,
+                to highlight the button that controls the panel */
+                    this.classList.toggle("active");
+
+                    /* Toggle between hiding and showing the active panel */
+                    var panel = this.nextElementSibling;
+                    if (panel.style.display === "block") {
+                        panel.style.display = "none";
+                    } else {
+                        panel.style.display = "block";
+                    }
+                });
+            }
+        }
+        function AutoRefresh() {
+            let stopRefresh = setInterval( tripStart, 5000);
+        }
+
+
 </script>
+</body>
+</html>
+
+<style>
+    .accordion {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        text-align: left;
+        border: none;
+        outline: none;
+        transition: 0.4s;
+        font-weight: 900;
+    }
+
+    /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+    .active, .accordion:hover {
+        background-color: #ccc;
+    }
+
+    /* Style the accordion panel. Note: hidden by default */
+    .panel {
+        padding: 0 18px;
+        background-color: white;
+        display: none;
+        overflow: hidden;
+    }
+    .accordion:after {
+        content: '\02795'; /* Unicode character for "plus" sign (+) */
+        font-size: 13px;
+        color: #777;
+        float: right;
+        margin-left: 5px;
+    }
+
+    .active:after {
+        content: "\2796"; /* Unicode character for "minus" sign (-) */
+    }
+</style>
